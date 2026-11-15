@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hakan AI — Yeni Nesil Yapay Zeka Asistanı</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { font-family: 'Inter', sans-serif; }
+code, pre { font-family: 'JetBrains Mono', monospace; }
+body { background-color: #09090b; color: #f4f4f5; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+.glass { background: rgba(24, 24, 27, 0.72); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+.prose p { margin-bottom: 0.75rem; line-height: 1.65; }
+.prose p:last-child { margin-bottom: 0; }
+.prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.prose li { margin-bottom: 0.35rem; }
+.prose strong { color: #ffffff; font-weight: 600; }
+.prose pre { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #111114; }
+.prose code:not(pre code) { background: rgba(255,255,255,0.08); padding: 0.15rem 0.4rem; border-radius: 0.375rem; font-size: 0.85em; color: #a5b4fc; }
+.typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+</style>
+</head>
+<body class="h-screen flex overflow-hidden selection:bg-indigo-500/30 selection:text-indigo-200">
+
+<!-- Mobil Menü Arka Planı -->
+<div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden md:hidden backdrop-blur-sm"></div>
+
+<!-- Sol Kenar Çubuğu -->
+<aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-72 bg-[#0c0c0f] border-r border-white/10 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0">
+<!-- Marka Başlığı -->
+<div class="p-4 flex items-center justify-between border-b border-white/5">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 p-[1px] shadow-lg shadow-indigo-500/20">
+<div class="w-full h-full bg-[#0c0c0f] rounded-[11px] flex items-center justify-center">
+<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
+<path d="M6 4V20M18 4V20M6 12H18" stroke="url(#hakanGrad)" stroke-width="2.5" stroke-linecap="round"/>
+<defs>
+<linearGradient id="hakanGrad" x1="6" y1="4" x2="18" y2="20" gradientUnits="userSpaceOnUse">
+<stop stop-color="#818cf8"/>
+<stop offset="0.5" stop-color="#c084fc"/>
+<stop offset="1" stop-color="#22d3ee"/>
+</linearGradient>
+</defs>
+</svg>
+</div>
+</div>
+<div>
+<h1 class="font-bold text-base tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">Hakan AI</h1>
+<span class="text-[10px] uppercase tracking-widest text-indigo-400 font-semibold">Pro Studio</span>
+</div>
+</div>
+<button onclick="toggleSidebar()" class="md:hidden text-zinc-400 hover:text-white p-1.5 rounded-lg">✕</button>
+</div>
+
+<!-- Yeni Sohbet & Arama -->
+<div class="p-3 space-y-2">
+<button onclick="createNewChat()" class="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium text-sm flex items-center justify-between shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.98]">
+<span class="flex items-center gap-2">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+Yeni Sohbet
+</span>
+<kbd class="text-[10px] bg-black/25 px-1.5 py-0.5 rounded text-indigo-100">Ctrl+K</kbd>
+</button>
+<div class="relative">
+<input id="searchInput" type="text" oninput="renderChatList()" placeholder="Sohbetlerde ara..." class="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500/50" />
+<svg class="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+</div>
+</div>
+
+<!-- Asistan Modları -->
+<div class="px-3 py-2">
+<p class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider px-2 mb-1.5">Asistan Modu</p>
+<div class="grid grid-cols-2 gap-1.5" id="personaSelector">
+<button onclick="setPersona('general')" data-persona="general" class="persona-btn text-left p-2 rounded-lg text-xs border border-indigo-500/40 bg-indigo-500/10 text-indigo-200 font-medium transition">✨ Genel</button>
+<button onclick="setPersona('coder')" data-persona="coder" class="persona-btn text-left p-2 rounded-lg text-xs border border-white/5 bg-white/[0.02] text-zinc-400 hover:bg-white/5 transition">💻 Yazılımcı</button>
+<button onclick="setPersona('writer')" data-persona="writer" class="persona-btn text-left p-2 rounded-lg text-xs border border-white/5 bg-white/[0.02] text-zinc-400 hover:bg-white/5 transition">✍️ Yazar</button>
+<button onclick="setPersona('academic')" data-persona="academic" class="persona-btn text-left p-2 rounded-lg text-xs border border-white/5 bg-white/[0.02] text-zinc-400 hover:bg-white/5 transition">🎓 Akademik</button>
+</div>
+</div>
+
+<!-- Sohbet Geçmişi -->
+<div class="flex-1 overflow-y-auto px-3 py-2 space-y-1" id="chatList"></div>
+
+<!-- Alt Ayarlar Barı -->
+<div class="p-3 border-t border-white/10 space-y-1.5">
+<button onclick="exportCurrentChat()" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-zinc-400 hover:text-white hover:bg-white/5 transition">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+Sohbeti Dışa Aktar (.txt)
+</button>
+<button onclick="openSettings()" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 transition">
+<span class="flex items-center gap-2.5">
+<svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+API Anahtarı & Ayarlar
+</span>
+<span id="apiStatusDot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+</button>
+</div>
+</aside>
+
+<!-- Ana İçerik Alanı -->
+<main class="flex-1 flex flex-col relative bg-[#09090b] overflow-hidden">
+<!-- Üst Bar -->
+<header class="h-14 border-b border-white/10 px-4 flex items-center justify-between glass z-10">
+<div class="flex items-center gap-3">
+<button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+<div>
+<h2 id="currentChatTitle" class="text-sm font-semibold text-zinc-100 truncate max-w-[180px] sm:max-w-xs">Yeni Sohbet</h2>
+<p id="currentPersonaLabel" class="text-[11px] text-zinc-500">Mod: Genel Asistan • Gemini 2.5 Flash</p>
+</div>
+</div>
+<button onclick="openSettings()" class="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 transition">
+API Ayarla
+</button>
+</header>
+
+<!-- Mesajlar ve Karşılama Ekranı -->
+<div id="messagesContainer" class="flex-1 overflow-y-auto px-4 py-6 scroll-smooth">
+<div id="welcomeScreen" class="max-w-2xl mx-auto h-full flex flex-col items-center justify-center text-center py-8">
+<div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 p-[1.5px] shadow-2xl shadow-indigo-500/25 mb-6">
+<div class="w-full h-full bg-[#09090b] rounded-[15px] flex items-center justify-center">
+<svg class="w-9 h-9" viewBox="0 0 24 24" fill="none">
+<path d="M6 4V20M18 4V20M6 12H18" stroke="url(#hakanHero)" stroke-width="2.5" stroke-linecap="round"/>
+<defs>
+<linearGradient id="hakanHero" x1="6" y1="4" x2="18" y2="20" gradientUnits="userSpaceOnUse">
+<stop stop-color="#818cf8"/>
+<stop offset="0.5" stop-color="#c084fc"/>
+<stop offset="1" stop-color="#22d3ee"/>
+</linearGradient>
+</defs>
+</svg>
+</div>
+</div>
+<h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">Hakan AI'ya Hoş Geldin</h2>
+<p class="text-zinc-400 text-sm max-w-md mb-8">Kod yaz, karmaşık konuları öğren, metinler üret veya fikir geliştir. Başlamak için aşağıdan bir konu seç ya da sorunu yaz.</p>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
+<button onclick="sendQuickPrompt('Bana modern ve hızlı bir Python web scraping kodu yazar mısın?')" class="p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 transition group">
+<p class="text-xs font-semibold text-indigo-400 mb-1">💻 Kod Geliştirme</p>
+<p class="text-xs text-zinc-300 group-hover:text-white">Modern bir Python web scraping kodu yaz</p>
+</button>
+<button onclick="sendQuickPrompt('Kuantum bilgisayarların çalışma mantığını 10 yaşındaki birine anlatır gibi özetle.')" class="p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 transition group">
+<p class="text-xs font-semibold text-purple-400 mb-1">🧠 Basit Anlatım</p>
+<p class="text-xs text-zinc-300 group-hover:text-white">Kuantum bilgisayarları en basit haliyle anlat</p>
+</button>
+<button onclick="sendQuickPrompt('Yeni kuracağım teknoloji girişimi için akılda kalıcı 10 marka ismi öner.')" class="p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 transition group">
+<p class="text-xs font-semibold text-cyan-400 mb-1">🚀 Fikir Üretimi</p>
+<p class="text-xs text-zinc-300 group-hover:text-white">Teknoloji girişimi için 10 yaratıcı isim bul</p>
+</button>
+<button onclick="sendQuickPrompt('Verimli ders çalışma ve odaklanma için bilimsel olarak kanıtlanmış 5 teknik nedir?')" class="p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 transition group">
+<p class="text-xs font-semibold text-emerald-400 mb-1">📚 Verimlilik</p>
+<p class="text-xs text-zinc-300 group-hover:text-white">Odaklanma için kanıtlanmış 5 teknik öner</p>
+</button>
+</div>
+</div>
+
+<div id="messagesList" class="max-w-3xl mx-auto space-y-6 hidden"></div>
+</div>
+
+<!-- Mesaj Yazma Alanı -->
+<div class="p-3 sm:p-4 border-t border-white/10 bg-[#09090b]/90 backdrop-blur-md">
+<div class="max-w-3xl mx-auto relative">
+<div class="flex items-end gap-2 bg-[#141418] border border-white/15 focus-within:border-indigo-500/60 rounded-2xl p-2 shadow-xl transition">
+<textarea id="promptInput" rows="1" onkeydown="handleKeyDown(event)" oninput="autoResize(this)" placeholder="Hakan AI'ya bir şey sor..." class="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-500 px-3 py-2 max-h-40 resize-none focus:outline-none"></textarea>
+<button id="sendBtn" onclick="sendMessage()" class="p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-600/25 transition disabled:opacity-40">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+</button>
+</div>
+<p class="text-[11px] text-center text-zinc-500 mt-2">Hakan AI hata yapabilir. Önemli bilgileri kontrol etmeyi unutmayın.</p>
+</div>
+</div>
+</main>
+
+<!-- Ayarlar Modalı -->
+<div id="settingsModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+<div class="bg-[#121216] border border-white/15 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-white">Hakan AI Ayarları</h3>
+<button onclick="closeSettings()" class="text-zinc-400 hover:text-white">✕</button>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block text-xs font-medium text-zinc-300 mb-1.5">Google Gemini API Anahtarı</label>
+<input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
+<p class="text-[11px] text-zinc-400 mt-1.5">Ücretsiz anahtarını <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-400 underline">Google AI Studio</a> üzerinden 10 saniyede alabilirsin. Anahtar sadece senin tarayıcında saklanır.</p>
+</div>
+<div class="flex justify-end gap-2 pt-2">
+<button onclick="closeSettings()" class="px-4 py-2 rounded-xl text-xs text-zinc-400 hover:text-white">İptal</button>
+<button onclick="saveSettings()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white">Kaydet</button>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const PERSONAS = {
+general: { name: 'Genel Asistan', prompt: 'Sen Hakan AI adlı yardımcı, zeki, net ve samimi bir yapay zeka asistanısın. Yanıtlarını Türkçe, düzenli ve anlaşılır şekilde ver.' },
+coder: { name: 'Yazılım Geliştirici', prompt: 'Sen Hakan AI uzman yazılım mimarısın. Temiz, güvenli, modern kodlar yaz ve teknik açıklamaları net yap. Yanıtların Türkçe olsun.' },
+writer: { name: 'Yaratıcı Yazar', prompt: 'Sen Hakan AI yaratıcı içerik ve metin yazarısın. Akıcı, etkileyici ve özgün Türkçe metinler üret.' },
+academic: { name: 'Akademik Uzman', prompt: 'Sen Hakan AI akademik araştırma ve eğitim asistanısın. Konuları bilimsel, yapılandırılmış ve öğretici biçimde Türkçe açıkla.' }
+};
+
+let chats = JSON.parse(localStorage.getItem('hakan_ai_chats') || '[]');
+let currentChatId = null;
+let currentPersona = 'general';
+let apiKey = localStorage.getItem('hakan_ai_key') || '';
+let isGenerating = false;
+
+marked.setOptions({
+highlight: function(code, lang) {
+const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+return hljs.highlight(code, { language }).value;
+}
+});
+
+function init() {
+updateApiDot();
+if (chats.length > 0) {
+loadChat(chats[0].id);
+} else {
+createNewChat(false);
+}
+renderChatList();
+}
+
+function updateApiDot() {
+const dot = document.getElementById('apiStatusDot');
+dot.className = apiKey ? 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'w-2 h-2 rounded-full bg-amber-500';
+}
+
+function toggleSidebar() {
+const sb = document.getElementById('sidebar');
+const ov = document.getElementById('sidebarOverlay');
+sb.classList.toggle('-translate-x-full');
+ov.classList.toggle('hidden');
+}
+
+function setPersona(p) {
+currentPersona = p;
+document.querySelectorAll('.persona-btn').forEach(btn => {
+if (btn.dataset.persona === p) {
+btn.className = 'persona-btn text-left p-2 rounded-lg text-xs border border-indigo-500/40 bg-indigo-500/10 text-indigo-200 font-medium transition';
+} else {
+btn.className = 'persona-btn text-left p-2 rounded-lg text-xs border border-white/5 bg-white/[0.02] text-zinc-400 hover:bg-white/5 transition';
+}
+});
+document.getElementById('currentPersonaLabel').textContent = Mod: ${PERSONAS[p].name} • Gemini 2.5 Flash`;
+}
+
+function createNewChat(switchMobile = true) {
+const id = Date.now().toString();
+chats.unshift({ id, title: 'Yeni Sohbet', messages: [] });
+saveChats();
+loadChat(id);
+renderChatList();
+if (switchMobile && window.innerWidth < 768) toggleSidebar();
+}
+
+function loadChat(id) {
+currentChatId = id;
+const chat = chats.find(c => c.id === id);
+if (!chat) return;
+document.getElementById('currentChatTitle').textContent = chat.title;
+renderMessages();
+renderChatList();
+}
+
+function deleteChat(e, id) {
+e.stopPropagation();
+chats = chats.filter(c => c.id !== id);
+saveChats();
+if (chats.length === 0) createNewChat(false);
+else if (currentChatId === id) loadChat(chats[0].id);
+else renderChatList();
+}
+
+function saveChats() {
+localStorage.setItem('hakan_ai_chats', JSON.stringify(chats));
+}
+
+function renderChatList() {
+const list = document.getElementById('chatList');
+const q = document.getElementById('searchInput').value.toLowerCase();
+list.innerHTML = '';
+chats.filter(c => c.title.toLowerCase().includes(q)).forEach(chat => {
+const active = chat.id === currentChatId;
+const div = document.createElement('div');
+div.onclick = () => { loadChat(chat.id); if (window.innerWidth < 768) toggleSidebar(); };
+div.className = group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition${active ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'}; div.innerHTML =
+<span class="truncate pr-2">{chat.id}')" class="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition">✕</button>
+`;
+list.appendChild(div);
+});
+}
+
+function renderMessages() {
+const chat = chats.find(c => c.id === currentChatId);
+const welcome = document.getElementById('welcomeScreen');
+const list = document.getElementById('messagesList');
+
+if (!chat || chat.messages.length === 0) {
+welcome.classList.remove('hidden');
+list.classList.add('hidden');
+list.innerHTML = '';
+return;
+}
+
+welcome.classList.add('hidden');
+list.classList.remove('hidden');
+list.innerHTML = '';
+
+chat.messages.forEach((msg, idx) => {
+const isUser = msg.role === 'user';
+const wrapper = document.createElement('div');
+wrapper.className = flex gap-3.5 ${isUser ? 'justify-end' : 'justify-start'}`;
+
+if (isUser) {
+wrapper.innerHTML = &lt;div class="max-w-[82%] bg-gradient-to-br from-indigo-600 to-purple-600 text-white px-4 py-3 rounded-2xl rounded-tr-sm text-sm shadow-lg shadow-indigo-600/10 whitespace-pre-wrap"&gt;${escapeHtml(msg.text)}</div>
+; } else { const parsedHtml = enhanceCodeBlocks(marked.parse(msg.text)); wrapper.innerHTML =
+<div class="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center shrink-0 mt-0.5 text-indigo-400 font-bold text-xs">H</div>
+<div class="flex-1 min-w-0 max-w-[88%]">
+<div class="prose text-sm text-zinc-200 bg-white/[0.03] border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3.5">{idx})" class="hover:text-zinc-300 transition">Kopyala</button>
+<button onclick="regenerate(${idx})" class="hover:text-zinc-300 transition"&gt;Yeniden Üret&lt;/button&gt; &lt;/div&gt; &lt;/div&gt;;
+}
+list.appendChild(wrapper);
+});
+
+const container = document.getElementById('messagesContainer');
+container.scrollTop = container.scrollHeight;
+}
+
+function enhanceCodeBlocks(html) {
+const temp = document.createElement('div');
+temp.innerHTML = html;
+temp.querySelectorAll('pre').forEach(pre => {
+const code = pre.querySelector('code');
+const langClass = Array.from(code?.classList || []).find(c => c.startsWith('language-'));
+const lang = langClass ? langClass.replace('language-', '') : 'kod';
+const header = document.createElement('div');
+header.className = 'flex items-center justify-between px-3.5 py-1.5 bg-white/5 border-b border-white/10 text-[11px] text-zinc-400';
+header.innerHTML = <span class="uppercase font-mono"&gt;${lang}</span><button onclick="copyCode(this)" class="hover:text-white transition">Kopyala</button>`;
+pre.insertBefore(header, pre.firstChild);
+});
+return temp.innerHTML;
+}
+
+function copyCode(btn) {
+const codeText = btn.closest('pre').querySelector('code').innerText;
+navigator.clipboard.writeText(codeText);
+btn.textContent = 'Kopyalandı!';
+setTimeout(() => btn.textContent = 'Kopyala', 1500);
+}
+
+function copyText(idx) {
+const chat = chats.find(c => c.id === currentChatId);
+if (chat && chat.messages[idx]) {
+navigator.clipboard.writeText(chat.messages[idx].text);
+}
+}
+
+function sendQuickPrompt(text) {
+document.getElementById('promptInput').value = text;
+sendMessage();
+}
+
+async function sendMessage() {
+const input = document.getElementById('promptInput');
+const text = input.value.trim();
+if (!text || isGenerating) return;
+
+if (!apiKey) {
+openSettings();
+return;
+}
+
+const chat = chats.find(c => c.id === currentChatId);
+if (chat.messages.length === 0) {
+chat.title = text.slice(0, 32) + (text.length > 32 ? '...' : '');
+document.getElementById('currentChatTitle').textContent = chat.title;
+}
+
+chat.messages.push({ role: 'user', text });
+input.value = '';
+input.style.height = 'auto';
+saveChats();
+renderMessages();
+renderChatList();
+
+await fetchGeminiResponse(chat);
+}
+
+async function regenerate(aiMsgIdx) {
+if (isGenerating) return;
+const chat = chats.find(c => c.id === currentChatId);
+chat.messages = chat.messages.slice(0, aiMsgIdx);
+saveChats();
+renderMessages();
+await fetchGeminiResponse(chat);
+}
+
+async function fetchGeminiResponse(chat) {
+isGenerating = true;
+document.getElementById('sendBtn').disabled = true;
+
+const list = document.getElementById('messagesList');
+const loader = document.createElement('div');
+loader.id = 'typingLoader';
+loader.className = 'flex gap-3.5 items-center';
+loader.innerHTML = &lt;div class="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs"&gt;H&lt;/div&gt; &lt;div class="bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3 flex gap-1.5"&gt; &lt;span class="w-2 h-2 rounded-full bg-indigo-400 typing-dot"&gt;&lt;/span&gt; &lt;span class="w-2 h-2 rounded-full bg-purple-400 typing-dot"&gt;&lt;/span&gt; &lt;span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"&gt;&lt;/span&gt; &lt;/div&gt;;
+list.appendChild(loader);
+const container = document.getElementById('messagesContainer');
+container.scrollTop = container.scrollHeight;
+
+try {
+const contents = chat.messages.map(m => ({
+role: m.role === 'user' ? 'user' : 'model',
+parts: [{ text: m.text }]
+}));
+
+const res = await fetch(https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+systemInstruction: { parts: [{ text: PERSONAS[currentPersona].prompt }] },
+contents
+})
+});
+
+const data = await res.json();
+document.getElementById('typingLoader')?.remove();
+
+if (!res.ok) {
+throw new Error(data.error?.message || 'API isteği başarısız oldu.');
+}
+
+const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Yanıt oluşturulamadı.';
+chat.messages.push({ role: 'model', text: reply });
+} catch (err) {
+document.getElementById('typingLoader')?.remove();
+chat.messages.push({ role: 'model', text: ⚠️ **Hata:**${err.message}\n\nLütfen sağ üstten API Ayarla butonuna tıklayıp geçerli bir Gemini API anahtarı girdiğinden emin ol.` });
+}
+
+saveChats();
+renderMessages();
+isGenerating = false;
+document.getElementById('sendBtn').disabled = false;
+}
+
+function exportCurrentChat() {
+const chat = chats.find(c => c.id === currentChatId);
+if (!chat || chat.messages.length === 0) return;
+const content = chat.messages.map(m => [${m.role === 'user' ? 'Sen' : 'Hakan AI'}]:\n${m.text}\n).join('\n---\n\n');
+const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+const a = document.createElement('a');
+a.href = URL.createObjectURL(blob);
+a.download = ${chat.title.replace(/[^a-z0-9ğüşöçıİĞÜŞÖÇ]/gi, '_')}.txt;
+a.click();
+}
+
+function openSettings() {
+document.getElementById('apiKeyInput').value = apiKey;
+document.getElementById('settingsModal').classList.remove('hidden');
+document.getElementById('settingsModal').classList.add('flex');
+}
+
+function closeSettings() {
+document.getElementById('settingsModal').classList.add('hidden');
+document.getElementById('settingsModal').classList.remove('flex');
+}
+
+function saveSettings() {
+apiKey = document.getElementById('apiKeyInput').value.trim();
+localStorage.setItem('hakan_ai_key', apiKey);
+updateApiDot();
+closeSettings();
+}
+
+function autoResize(el) {
+el.style.height = 'auto';
+el.style.height = el.scrollHeight + 'px';
+}
+
+function handleKeyDown(e) {
+if (e.key === 'Enter' && !e.shiftKey) {
+e.preventDefault();
+sendMessage();
+}
+}
+
+document.addEventListener('keydown', e => {
+if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+e.preventDefault();
+createNewChat(false);
+}
+});
+
+function escapeHtml(str) {
+return str.replace(/[&<>"']/g, m => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[m]));
+}
+
+init();
+</script>
+</body>
+</html>
